@@ -37,7 +37,7 @@ const removeOne = (req, res, next) => {
     }
 
     Post.findOneById(req.params._id)
-    .then(remove)
+    .then(del)
     .then(respond)
     .catch(onError)
 }
