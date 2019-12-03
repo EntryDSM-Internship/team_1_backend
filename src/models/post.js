@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const Post = new Schema({
     nick: String,
     content: String,
-    good: Number,
+    good: Boolean,
+    goodCount: Number
 });
 
 Post.statics.create = function (nick, content) {
