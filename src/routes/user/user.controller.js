@@ -12,34 +12,16 @@ let transporter = nodemailer.createTransport({
 
 let emailCode = new Array(1, 2, 3, 4, 5, 6).join('');
 
+//-------------------------------------------------------
+// 닉네임 중복 확인
+
 const existEmail = (req, res, next) => {
-    const nick = req.body.nick
+    const email = req.body.email;
 
     const check = (user) => {
         if (!user) {
             next();
         } else {    
-            res.status(409).json({ message: 'nickemail already exist' });
-        }
-    }
-
-    const onError = (err) => {
-        res.status(500).json(err);
-    }
-
-    User.findOneByEmail(nick)
-    .then(check)
-    .catch(onError)
-}
-
-const existNick = (req, res, next) => {
-    const email = req.body.email;
-
-    const check = (user) => {
-        if (!user) {
-            res.status(200).json({ message: 'Available Email and Nickname'});
-        } else {
-            console.log(user);
             res.status(409).json({ message: 'email already exist' });
         }
     }
@@ -52,6 +34,32 @@ const existNick = (req, res, next) => {
     .then(check)
     .catch(onError)
 }
+
+//-------------------------------------------------------
+// 이메일 중복 확인
+
+const existNick = (req, res, next) => {
+    const nick = req.body.nick;
+
+    const check = (user) => {
+        if (!user) {
+            res.status(200).json({ message: 'Available Email and Nickname'});
+        } else {
+            res.status(410).json({ message: 'nickname already exist' });
+        }
+    }
+
+    const onError = (err) => {
+        res.status(500).json(err);
+    }
+
+    User.findOneByNick(nick)
+    .then(check)
+    .catch(onError)
+}
+
+//-------------------------------------------------------
+// 이메일 전송
 
 const emailSend = (req, res, next) => {
     const email = req.body.email;
@@ -74,14 +82,20 @@ const emailSend = (req, res, next) => {
     });
 }
 
+//-------------------------------------------------------
+// 인증코드 확인
+
 const emailAuth = (req, res, next) => {
     const authNum = req.body.auth;
     if (authNum === emailCode) {
-        res.status(200).json('correct email auth code');
+        res.status(200).json({ message: 'correct email auth code' });
     } else {
-        res.status(403).json('Authentication failed');
+        res.status(403).json({ message: 'Authentication failed' });
     }
 }
+
+//-------------------------------------------------------
+// 회원가입
 
 const register = (req, res, next) => {
     const { name, nick, email, password } = req.body;
@@ -98,6 +112,9 @@ const register = (req, res, next) => {
     .then(respond)
     .catch(onError)
 }
+
+//-------------------------------------------------------
+// 로그인
 
 const login = (req, res, next) => {
     const { email, password } = req.body;
@@ -130,8 +147,8 @@ const login = (req, res, next) => {
                     }, (err, token) => {
                         if (err) reject(err);
                         resolve({
-                            access: token,
-                            refresh: user.refresh,
+                            access_token: token,
+                            refresh_token: user.refresh,
                         });
                     });
                     
@@ -140,14 +157,16 @@ const login = (req, res, next) => {
             } else {
                 throw new Error('incorrect password');
             }
-        }
+        }    
     }
+
 
     const respond = (token) => {
         res.status(200).json(token);
     }
 
     const onError = (err) => {
+        console.log(email, password);
         res.status(403).json(err.message);
     }
 
@@ -156,6 +175,9 @@ const login = (req, res, next) => {
     .then(respond)
     .catch(onError)
 }
+
+//-------------------------------------------------------
+// 엑세스토큰 재발급
 
 const refreshAccess = (req, res, next) => {
     const email = req.decoded.email;
