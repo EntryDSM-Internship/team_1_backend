@@ -23,8 +23,15 @@ const User = new Schema({
         required: true,
     },
     refresh: String,
-    follower: Array,
-    following: Array,
+    follower: {
+        type: Array,
+        unique: true,
+    },
+    following: {
+        type: Array,
+        unique: true
+    },
+    allow: Array
 });
 
 User.statics.create = function(name, nick, email, password) {
@@ -41,6 +48,15 @@ User.statics.create = function(name, nick, email, password) {
 User.statics.findOneByEmail = function(email) {
     return this.findOne({
         email
+    }).exec();
+}
+
+User.statics.followerIncrese = function(email) {
+    return this.findOneAndUpdate({ 
+        email
+     }, { $inc: { 
+         'follower': 1 
+        } 
     }).exec();
 }
 

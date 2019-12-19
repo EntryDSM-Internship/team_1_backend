@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const Post = new Schema({
     nick: String,
+    title: String,
     content: String,
     good: Boolean,
     goodCount: Number
