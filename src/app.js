@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const logger = require('morgan');
+const cors = require('cors');
 
 const app = express();
 
@@ -9,10 +10,7 @@ const config = require('./config');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(logger('dev'));
-
-app.get('/', (req, res, next) => {
-    res.send('Hello');
-});
+app.use(cors());
 
 app.use('/api', require('./routes'));
 
