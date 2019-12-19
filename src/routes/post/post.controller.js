@@ -1,7 +1,10 @@
 const Post = require('../../models/post');
 
+//-------------------------------------------------------
+// 글쓰기
+
 const createOne = (req, res, next) => {
-    const content = req.body.content;
+    const { title, content } = req.body;
     const nick = req.decoded.nick;
 
     const respond = (post) => {
@@ -15,14 +18,18 @@ const createOne = (req, res, next) => {
         res.status(500).json(err);
     }
 
-    Post.create(nick, content)
+    Post.create(nick, title, content)
     .then(respond)
     .catch(onError)
 }
 
+//-------------------------------------------------------
+// 글 삭제
+
 const removeOne = (req, res, next) => {
     const del = (post) => {
-        post.remove()
+        if (req.decoded.nick === post.nick) post.remove();
+        else throw new Error('권한이 없습니다');
     }
     
     const respond = (post) => {
@@ -33,7 +40,7 @@ const removeOne = (req, res, next) => {
     }
 
     const onError = (err) => {
-        res.status(500).json(err);
+        res.status(409).json(err.message);
     }
 
     Post.findOneById(req.params._id)
@@ -41,6 +48,8 @@ const removeOne = (req, res, next) => {
     .then(respond)
     .catch(onError)
 }
+
+
 
 module.exports = {
     createOne,
