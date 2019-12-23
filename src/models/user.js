@@ -68,6 +68,6 @@ User.statics.findOneByNick = function(nick) {
 
 User.methods.verify = function(password) {
     return this.password === password;
-}
+} 
 
 module.exports = mongoose.model('User', User);
