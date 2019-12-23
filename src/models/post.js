@@ -5,7 +5,15 @@ const Post = new Schema({
     nick: String,
     title: String,
     content: String,
-    like: Number
+    likeCount: {
+        type: Number,
+        default: 0
+    },
+    like: Array,
+    date: {
+        type: Date,
+        default: Date.now,
+    }
 });
 
 Post.statics.create = function (nick, content) {
