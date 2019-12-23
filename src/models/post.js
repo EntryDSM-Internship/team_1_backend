@@ -5,8 +5,7 @@ const Post = new Schema({
     nick: String,
     title: String,
     content: String,
-    good: Boolean,
-    goodCount: Number
+    like: Number
 });
 
 Post.statics.create = function (nick, content) {
