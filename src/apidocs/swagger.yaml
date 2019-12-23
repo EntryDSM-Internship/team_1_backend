@@ -1,0 +1,442 @@
+swagger: "2.0"
+info:
+  description: entry project
+  version: "1.0.0"
+  title: entrysns
+host: "localhost:3000"
+basePath: "/api"
+tags:
+  - name: "user"
+    description: "User API"
+  - name: "post"
+    description: "Post API"
+  - name: "follow"
+    description: "Follow API"
+schemes:
+- "http"
+paths:
+  /user/exist:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "닉네임, 이메일 중복 확인"
+      description: "닉네임, 이메일 중복 확인"
+      parameters:
+        - name: "exist"
+          in: "body"
+          description: "User exist"
+          schema: 
+            type: "string"
+            properties:
+              nick:
+                type: "string"
+                example: "nick"
+              email:
+                type: "string"
+                example: "email@gmail.com"
+      responses:
+        200:
+          description: "중복 아님"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+        409:
+          description: "이메일 중복됨"
+          schema:
+            type: "object"
+            properties:
+              message: 
+                type: "string"
+        410:
+          description: "닉네임 중복됨"
+          schema:
+            type: "object"
+            properties:
+              message: 
+                type: "string"
+  /user/send:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "이메일 전송"
+      description: "이메일 전송"
+      parameters:
+        - name: "email"
+          in: "body"
+          description: "User email"
+          schema: 
+            type: "string"
+            properties:
+              email:
+                type: "string"
+                example: "email@gmail.com"
+      responses:
+        200:
+          description: "이메일 전송 성공"
+        500:
+          description: "이메일 전송 실패"
+  /user/email:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "이메일 인증"
+      description: "이메일 인증"
+      parameters:
+        - name: "auth"
+          in: "body"
+          description: "User auth"
+          schema: 
+            type: "string"
+            properties:
+              auth:
+                type: "string"
+                example: "123456"
+      responses:
+        200:
+          description: "이메일 인증 성공"
+        403:
+          description: "이메일 인증 실패"
+  /user/register:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "회원가입"
+      description: "회원가입"
+      parameters:
+      - name: "register"
+        in: "body"
+        description: "User register"
+        schema:
+          type: "string"
+          properties: 
+            name: 
+              type: "string"
+              example: "name"
+            nick:
+              type: "string"
+              example: "nick"
+            email:
+              type: "string"
+              example: "email@gmail.com"
+            password:
+              type: "string"
+              example: "password"
+      responses:
+        200:
+          description: "회원가입 성공"
+          schema:
+            type: "object"
+            properties:
+              name:
+                type: "string"
+                example: "name"
+              nick:
+                type: "string"
+                example: "nick"
+              email:
+                type: "string"
+                example: "email@gmail.com"
+              password:
+                type: "string"
+                example: "password"      
+        500:
+          description: "회원가입 실패"
+  /user/login:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "로그인"
+      description: "로그인"
+      parameters:
+        - name: "login"
+          in: "body"
+          description: "User login"
+          schema: 
+            type: "string"
+            properties:
+              email:
+                type: "string"
+                example: "email@gmail.com"
+              password:
+                type: "string"
+                example: "password"
+      responses:
+        200:
+          description: "로그인 성공"
+        403:
+          description: "로그인 실패"
+  /post/write:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "post"
+      summary: "글 쓰기"
+      description: "글 쓰기"
+      parameters:
+        - name: "write"
+          in: "body"
+          description: "글 쓰기"
+          schema: 
+            type: "string"
+            properties:
+              title:
+                type: "string"
+                example: "title"
+              content:
+                type: "string"
+                example: "content"
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              nick:
+                type: "string"
+                example: "nick"
+              title:
+                type: "string"
+                example: "title"
+              content:
+                type: "string"
+                example: "content"
+        403:
+          description: "로그인 되어있지 않음" 
+        500:
+          description: "실패"
+  /post/delete/{_id}:
+    delete:
+      produces: 
+        - "application/json"
+      tags:
+      - "post"
+      summary: "글 삭제"
+      description: "글 삭제"
+      parameters:
+        - name: "_id"
+          in: "path"
+          description: "글 아이디"
+          type: "string"
+          required: true
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "remove"
+          in: "body"
+          description: "글 삭제"
+          schema: 
+            type: "string"
+            properties:
+              nick:
+                type: "string"
+                example: "nick"
+              title:
+                type: "string"
+                example: "title"
+              content:
+                type: "string"
+                example: "content"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              nick:
+                type: "string"
+                example: "nick"
+              title:
+                type: "string"
+                example: "title"
+              content:
+                type: "string"
+                example: "content"
+        403:
+          description: "로그인 되어있지 않음" 
+        500:
+          description: "실패"
+  /post/like/{_id}:
+    get:
+      produces: 
+        - "application/json"
+      tags:
+      - "post"
+      summary: "글 좋아요"
+      description: "글 좋아요"
+      parameters:
+        - name: "_id"
+          in: "path"
+          description: "글 아이디"
+          type: "string"
+          required: true
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              like:
+                type: "number"
+                example: 1
+        403:
+          description: "로그인 되어있지 않음" 
+        500:
+          description: "실패"
+  /follow/following/{nick}:
+    get:
+      prodeces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 신청"
+      description: "팔로우 신청"
+      parameters:
+        - name: "nick"
+          in: "path"
+          description: "닉네임"
+          type: "string"
+          required: true
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /follow/list:
+    get:
+      prodeces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 신청 목록"
+      description: "팔로우 신청 목록"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              list:
+                type: "array"
+                items:
+                  type: "string"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /follow/allow:
+    get:
+      prodeces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 수락"
+      description: "팔로우 수락"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "nick"
+          in: "path"
+          type: "string"
+          description: "닉네임"
+      responses:
+        200:
+          description: "성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /follow/reject:
+    get:
+      prodeces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 거절"
+      description: "팔로우 거절"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "nick"
+          in: "path"
+          type: "string"
+          description: "닉네임"
+      responses:
+        200:
+          description: "성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /follow/unfollow:
+    get:
+      prodeces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 취소"
+      description: "팔로우 취소"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "nick"
+          in: "path"
+          type: "string"
+          description: "닉네임"
+      responses:
+        200:
+          description: "성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
