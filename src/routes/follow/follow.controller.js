@@ -13,7 +13,7 @@ const addFollowing = (req, res, next) => {
     }
 
     const onError = (error) => {
-        res.status(409).json(error);
+        res.status(500).json(error);
     }
     
     User.findOneByEmail(email)

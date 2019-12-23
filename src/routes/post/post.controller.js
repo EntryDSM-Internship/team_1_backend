@@ -49,9 +49,44 @@ const removeOne = (req, res, next) => {
     .catch(onError)
 }
 
+//-------------------------------------------------------
+// 글 좋아요
+
+const likeOne = (req, res, next) => {
+    const nick = req.decoded.nick;
+    const like = (post) => {
+        const check = post.like.indexOf(nick);
+        if (check == -1) {
+            post.likeCount++;
+            post.like.push(nick);
+            post.save();
+        } else {
+            post.like.splice(check, 1);
+            post.likeCount--;
+            post.save();
+        }
+    }
+
+    const respond = (post) => {
+        res.status(200).json({
+            message: 'success',
+            like: post.likeCount,
+        });
+    }
+
+    const onError = (error) => {
+        res.status(500).json({ message: error });
+    }
+
+    Post.findOneById(req.params._id)
+    .then(like)
+    .then(respond)
+    .catch(onError)
+}
 
 
 module.exports = {
     createOne,
-    removeOne
+    removeOne,
+    likeOne
 }
