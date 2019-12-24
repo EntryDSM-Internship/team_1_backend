@@ -49,16 +49,7 @@ User.statics.findOneByEmail = function(email) {
     return this.findOne({
         email
     }).exec();
-}
-
-User.statics.followerIncrese = function(email) {
-    return this.findOneAndUpdate({ 
-        email
-     }, { $inc: { 
-         'follower': 1 
-        } 
-    }).exec();
-}
+}   
 
 User.statics.findOneByNick = function(nick) {
     return this.findOne({
