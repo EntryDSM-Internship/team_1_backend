@@ -4,20 +4,27 @@ const User = require('../../models/user');
 // 팔로우 신청
 
 const addFollowing = (req, res, next) => {
-    const email = req.decoded.email;
     const nick = req.params.nick;
 
     const create = (user) => {
-        User.findOneByNick(nick).allow.push(user.nick);
-        res.status(200).json({ message: 'success' });
+        user.allow.push(req.decoded.nick);
+        user.save();
+        console.log(user.allow);
+    }
+    
+    const respond = () => {
+        res.status(200).json({
+            message: "success"
+        });
     }
 
     const onError = (error) => {
-        res.status(500).json(error);
+        res.status(500).json(error.message);
     }
     
-    User.findOneByEmail(email)
+    User.findOneByNick(nick)
     .then(create)
+    .then(respond)
     .catch(onError)
 }
 
