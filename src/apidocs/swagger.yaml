@@ -3,7 +3,7 @@ info:
   description: entry project
   version: "1.0.0"
   title: entrysns
-host: "localhost:3000"
+host: "10.156.147.200:3000"
 basePath: "/api"
 tags:
   - name: "user"
@@ -12,6 +12,8 @@ tags:
     description: "Post API"
   - name: "follow"
     description: "Follow API"
+  - name: "main"
+    description: "main API"
 schemes:
 - "http"
 paths:
@@ -151,6 +153,40 @@ paths:
                 example: "password"      
         500:
           description: "회원가입 실패"
+  /user/profile/{nick}:
+    post:
+      produces: 
+        - "application/json"
+      consumes: 
+        - "multipart/form-data"
+      tags:
+      - "user"
+      summary: "프로필 사진"
+      description: "프로필 사진"
+      parameters:
+      - name: "nick"
+        in: "path"
+        type: "string"
+        description: "닉네임"
+        required: true
+      - name: "img"
+        in: "formData"
+        type: "file"
+        description: "profile image"
+      responses:
+        200:
+          description: "프로필 사진 설정 성공"
+          schema:
+            type: "object"
+            properties:
+              message: 
+                type: "string"
+                example: "success"
+              profile:
+                type: "string"
+                example: "filename.png"
+        500:
+          description: "회원가입 실패"
   /user/login:
     post:
       produces: 
@@ -175,29 +211,58 @@ paths:
       responses:
         200:
           description: "로그인 성공"
+          schema: 
+            type: "object"
+            properties:
+              access_token:
+                type: "string"
+                example: "access_token"
+              refresh_token:
+                type: "string"
+                example: "refresh_token"
         403:
           description: "로그인 실패"
+  /user/refresh:
+    get:
+      produces:
+        - "application/json"
+      tags:
+      - "user"
+      summary: "액세스 토큰 재발급"
+      description: "액세스 토큰 재발급"
+      parameters:
+        - name: "x-refresh-token"
+          in: "header"
+          type: "string"
+          description: "리프레쉬 토큰"
+      responses:
+        200:
+          description: "액세스 토큰 재발급 성공"
+          schema:
+            type: "object"
+            properties:
+              access_token:
+                type: "string"
+                example: "access_token"
   /post/write:
     post:
       produces: 
         - "application/json"
+      consumes: 
+        - "multipart/form-data"
       tags:
       - "post"
       summary: "글 쓰기"
       description: "글 쓰기"
       parameters:
-        - name: "write"
-          in: "body"
-          description: "글 쓰기"
-          schema: 
-            type: "string"
-            properties:
-              title:
-                type: "string"
-                example: "title"
-              content:
-                type: "string"
-                example: "content"
+        - name: "content"
+          in: "formData"
+          type: "string"
+          description: "post content"
+        - name: "img"
+          in: "formData"
+          type: "file"
+          description: "post image"
         - name: "x-access-token"
           in: "header"
           type: "string"
@@ -214,12 +279,25 @@ paths:
               nick:
                 type: "string"
                 example: "nick"
-              title:
-                type: "string"
-                example: "title"
               content:
                 type: "string"
                 example: "content"
+              img:
+                type: "array"
+                items:
+                  type: "string"
+                  example: "img.jpg"
+              likeCount:
+                type: "number"
+                example: "1"
+              like:
+                type: "array"
+                items:
+                  type: "string"
+                  example: "nick"
+              date: 
+                type: "string"
+                example: "date"
         403:
           description: "로그인 되어있지 않음" 
         500:
@@ -315,7 +393,7 @@ paths:
           description: "실패"
   /follow/following/{nick}:
     get:
-      prodeces:
+      produces:
       - "application/json"
       tags:
       - "follow"
@@ -338,9 +416,9 @@ paths:
           description: "로그인 되어있지 않음"
         500:
           description: "실패"
-  /follow/list:
+  /follow/allowlist:
     get:
-      prodeces:
+      produces:
       - "application/json"
       tags:
       - "follow"
@@ -370,7 +448,7 @@ paths:
           description: "실패"
   /follow/allow:
     get:
-      prodeces:
+      produces:
       - "application/json"
       tags:
       - "follow"
@@ -385,6 +463,7 @@ paths:
           in: "path"
           type: "string"
           description: "닉네임"
+          required: true
       responses:
         200:
           description: "성공"
@@ -394,7 +473,7 @@ paths:
           description: "실패"
   /follow/reject:
     get:
-      prodeces:
+      produces:
       - "application/json"
       tags:
       - "follow"
@@ -409,6 +488,7 @@ paths:
           in: "path"
           type: "string"
           description: "닉네임"
+          required: true
       responses:
         200:
           description: "성공"
@@ -417,8 +497,8 @@ paths:
         500:
           description: "실패"
   /follow/unfollow:
-    get:
-      prodeces:
+    delete:
+      produces:
       - "application/json"
       tags:
       - "follow"
@@ -433,9 +513,168 @@ paths:
           in: "path"
           type: "string"
           description: "닉네임"
+          required: true
       responses:
         200:
           description: "성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /follow/followlist:
+    get:
+      produces:
+      - "application/json"
+      tags:
+      - "follow"
+      summary: "팔로우 목록"
+      description: "팔로우 목록"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              follow:
+                type: "array"
+                items:
+                  type: "string"
+                  example: "nick"
+              following:
+                type: "array"
+                items:
+                  type: "string"
+                  example: "nick"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /main:
+    get:
+      produces: 
+      - "application/json"
+      tags: 
+      - "main"
+      summary: "메인 유저정보"
+      description: "메인 유저정보"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              nick:
+                type: "string"
+              name: 
+                type: "string"
+              email:
+                type: "string"
+              profile:
+                type: "string"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"       
+  /main/post:
+    get:
+      produces: 
+      - "application/json"
+      tags: 
+      - "main"
+      summary: "메인 타임라인"
+      description: "메인 타임라인"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              post: 
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    nick:
+                      type: "string"
+                      example: "nick"
+                    content:
+                      type: "string"
+                      example: "content"
+                    img:
+                      type: "array"
+                      items:
+                          type: "string"
+                    likeCount:
+                      type: "number"
+                      example: "1"
+                    like:
+                      type: "array"
+                      items: 
+                          type: "string"
+                          example: "nick"
+                    date:
+                      type: "string"
+                      example: "date"
+                    isMine:
+                      type: "boolean"
+                      example: true
+                    isLike:
+                      type: "boolean"
+                      example: true
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"        
+  /profile/{nick}:
+    get:
+      produces:
+      - "application/json"
+      tags:
+      - "profile"
+      summary: "메인 유저정보"
+      description: "메인 유저정보"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "nick"
+          in: "path"
+          type: "string"
+          description: "닉네임"
+          required: true
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              nick:
+                type: "string"
+              name: 
+                type: "string"
+              email:
+                type: "string"
+              profile:
+                type: "string"
         403:
           description: "로그인 되어있지 않음"
         500:
