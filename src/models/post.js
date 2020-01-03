@@ -3,8 +3,11 @@ const Schema = mongoose.Schema;
 
 const Post = new Schema({
     nick: String,
-    title: String,
-    content: String,
+    content: {
+        type: String,
+        default: null
+    },
+    img: Array,
     likeCount: {
         type: Number,
         default: 0
@@ -25,9 +28,21 @@ Post.statics.create = function (nick, content) {
     return post.save();
 }
 
+Post.statics.findByNick = function(nick) {
+    return this.find({
+        nick
+    }).exec();
+}
+
 Post.statics.findOneById = function(_id) {
     return this.findOne({
         _id
+    }).exec();
+}
+
+Post.statics.findAll = function(nick) {
+    return this.find({
+        nick
     }).exec();
 }
 

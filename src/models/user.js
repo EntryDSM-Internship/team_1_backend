@@ -7,12 +7,10 @@ const User = new Schema({
     email: {
         type: String,
         required: true,
-        unique: true,
     },
     nick: {
         type: String,
         required: true,
-        unique: true,
     },
     name: {
         type: String,
@@ -23,15 +21,17 @@ const User = new Schema({
         required: true,
     },
     refresh: String,
-    follower: {
-        type: Array,
-        unique: true,
+    follower: Array,
+    followerImg: Array,
+    following: Array,
+    followingImg: Array,
+    allow: Array,
+    allowImg: Array,
+    img: {
+        type: String,
+        default: 'profile/0.jpg'
     },
-    following: {
-        type: Array,
-        unique: true
-    },
-    allow: Array
+    postId: Array
 });
 
 User.statics.create = function(name, nick, email, password) {
@@ -57,8 +57,15 @@ User.statics.findOneByNick = function(nick) {
     }).exec();
 }
 
+User.statics.findByNick = function(nick) {
+    return this.find({
+        nick
+    }).exec();
+}
+
+
 User.methods.verify = function(password) {
     return this.password === password;
-} 
+}
 
 module.exports = mongoose.model('User', User);
