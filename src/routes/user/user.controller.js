@@ -1,16 +1,24 @@
 const User = require('../../models/user');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const smtpTransport = require('nodemailer-smtp-transport');
+const handlebars = require('handlebars');
 
-let transporter = nodemailer.createTransport({
+const readHTMLFile = (path, callback) => {
+    fs.readFile(path, { encoding: 'utf-8' }, (err, html) => {
+        if (err) console.log(err.message);
+        else callback(null, html);
+    })
+} 
+
+const transport = nodemailer.createTransport(smtpTransport({
     service: 'Gmail',
     auth: {
         user: 'seungbin031206@gmail.com',
         pass: 'ysb031206'
     }
-});
-
-let emailCode = new Array(1, 2, 3, 4, 5, 6).join('');
+}));
 
 //-------------------------------------------------------
 // 닉네임 중복 확인
@@ -64,21 +72,34 @@ const existNick = (req, res, next) => {
 const emailSend = (req, res, next) => {
     const email = req.body.email;
 
-    let mailOption = {
-        from: 'seungbin031206@gmail.com',
-        to: email,
-        subject: 'mailAuth',
-        text: emailCode,
-    }
+    emailCode = new Array();
 
-    transporter.sendMail(mailOption, (err, info) => {
-        if (err) {
-            res.json(err);
-            console.error(err);
-            next('error')
-        } else {
-            res.send('Email Sent!' + info.response);
+    for (let i = 0; i < 6; i++) {
+        emailCode.push(Math.floor(Math.random() * 10));
+    }
+      
+
+    readHTMLFile(__dirname + '../../../Email.html', (err, html) => {
+        const template = handlebars.compile(html);
+
+        const replacements = {
+            emailCode: emailCode.join(''),
+        };
+
+        const htmlSend = template(replacements);
+        const mailOption = {
+            from: 'seungbin031206@gmail.com',
+            to: email,
+            subject: 'mailAuth',
+            html: htmlSend,
         }
+        transport.sendMail(mailOption, (err, info) => {
+            if (err) {
+                res.json(err.message);
+            } else {
+                res.json(info.response);
+            }
+        })
     });
 }
 
@@ -87,7 +108,7 @@ const emailSend = (req, res, next) => {
 
 const emailAuth = (req, res, next) => {
     const authNum = req.body.auth;
-    if (authNum === emailCode) {
+    if (authNum === emailCode.join('')) {
         res.status(200).json({ message: 'correct email auth code' });
     } else {
         res.status(403).json({ message: 'Authentication failed' });
@@ -99,7 +120,6 @@ const emailAuth = (req, res, next) => {
 
 const register = (req, res, next) => {
     const { name, nick, email, password } = req.body;
-
     const respond = (user) => {
         res.status(200).json(user);
     }
@@ -110,6 +130,35 @@ const register = (req, res, next) => {
     
     User.create(name, nick, email, password)
     .then(respond)
+    .catch(onError)
+}
+
+//-------------------------------------------------------
+// 프로필 사진 설정
+
+const profile = (req, res, next) => {
+    const nick = req.params.nick;
+    
+    const save = (user) => {
+        if (req.file !== undefined) {
+            user.img = 'profile/' + req.file.filename;
+        }
+        user.save();
+        res.status(200).json({
+            message: 'success',
+            profile: user.img
+        });
+    }
+
+    const onError = (error) => {
+        console.log(error.message);
+        res.status(500).json({
+            message: error.message
+        });
+    }
+
+    User.findOneByNick(nick)
+    .then(save)
     .catch(onError)
 }
 
@@ -141,6 +190,7 @@ const login = (req, res, next) => {
                         name: user.name,
                         nick: user.nick,
                         email: user.email,
+                        img: user.img
                     }, secret,
                     {
                         expiresIn: '5m',
@@ -166,7 +216,6 @@ const login = (req, res, next) => {
     }
 
     const onError = (err) => {
-        console.log(email, password);
         res.status(403).json(err.message);
     }
 
@@ -191,11 +240,12 @@ const refreshAccess = (req, res, next) => {
                     name: user.name,
                     nick: user.nick,
                     email: user.email,
+                    img: user.img
                 }, secret,
                 {
                     expiresIn: '5m'
                 }, (err, token) => {
-                    if (err) reject(err)
+                if (err) reject(err)
                     resolve(token)
                 });
             });
@@ -206,7 +256,7 @@ const refreshAccess = (req, res, next) => {
     }
 
     const respond = (token) => {
-        res.status(200).json({ access: token });
+        res.status(200).json({ access_token: token });
     }
 
     const onError = (err) => {
@@ -225,6 +275,7 @@ module.exports = {
     register,
     emailSend,
     emailAuth,
+    profile,
     login,
     refreshAccess
 }
