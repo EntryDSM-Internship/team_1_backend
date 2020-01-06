@@ -3,6 +3,7 @@ const path = require('path');
 const multer = require('multer');
 const controller = require('./user.controller');
 const refreshMiddleware = require('../../middlewares/refresh');
+const authMiddleware = require('../../middlewares/auth');
 
 const upload = multer({
     storage: multer.diskStorage({
@@ -23,5 +24,7 @@ router.post('/exist', controller.existEmail, controller.existNick);
 router.post('/profile/:nick', upload.single('img'), controller.profile);
 router.post('/login', controller.login);
 router.get('/refresh', refreshMiddleware, controller.refreshAccess);
+router.get('/search/:nick', authMiddleware, controller.search);
+router.patch('/password', controller.changePassword);
 
 module.exports = router;
