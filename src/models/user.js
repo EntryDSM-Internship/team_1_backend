@@ -63,6 +63,9 @@ User.statics.findByNick = function(nick) {
     }).exec();
 }
 
+User.statics.findAll = function() {
+    return this.findAll().exec();
+}
 
 User.methods.verify = function(password) {
     return this.password === password;

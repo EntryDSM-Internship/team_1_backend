@@ -274,8 +274,17 @@ const refreshAccess = (req, res, next) => {
 const search = (req, res, next) => {
     let isFollowed;
 
+    const isAllow = (user) => {
+        if (user.allow.indexOf(req.decoded.nick) === -1) {
+            isFollowed = false
+        }
+
+        return User.findOneByEmail(req.decoded.email);
+    }
+    
     const isFollow = (user) => {
         if (user.following.indexOf(req.params.nick) === -1) isFollowed = false
+
         else isFollowed = true
 
         return User.findOneByNick(req.params.nick);
@@ -296,7 +305,8 @@ const search = (req, res, next) => {
         });
     }
 
-    User.findOneByNick(req.decoded.nick)
+    User.findOneByNick(req.params.nick)
+    .then(isAllow)
     .then(isFollow)
     .then(respond)
     .catch(onError)

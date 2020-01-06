@@ -160,8 +160,8 @@ const unFollow = (req, res, next) => {
     const nick = req.params.nick;
 
     const cancle = (user) => {
-        user.following.splice(user.following.indexOf(nick), 1);
-        user.followingImg.splice(user.following.indexOf(nick), 1);
+        user.following.splice(user.following.indexOf(nick) - 1, 1);
+        user.followingImg.splice(user.following.indexOf(nick) - 1, 1);
         user.save();
         next();
     }
@@ -179,8 +179,8 @@ const unFollower = (req, res, next) => {
     const nick = req.params.nick;
 
     const removed = (user) => {
-        user.follower.splice(user.follower.indexOf(req.decoded.nick), 1);
-        user.followerImg.splice(user.follower.indexOf(req.decoded.nick), 1);
+        user.follower.splice(user.follower.indexOf(req.decoded.nick) - 1, 1);
+        user.followerImg.splice(user.follower.indexOf(req.decoded.nick) - 1, 1);
         user.save();
         res.status(200).json({ message: "success to unfollow" });        
     }
@@ -190,7 +190,6 @@ const unFollower = (req, res, next) => {
     }
 
     User.findOneByNick(nick)
-    .then(userFind)
     .then(removed)
     .catch(onError)
 }

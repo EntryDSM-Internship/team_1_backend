@@ -87,6 +87,29 @@ paths:
           description: "이메일 전송 성공"
         500:
           description: "이메일 전송 실패"
+  /user/send:
+    post:
+      produces: 
+        - "application/json"
+      tags:
+      - "user"
+      summary: "이메일 전송"
+      description: "이메일 전송"
+      parameters:
+        - name: "email"
+          in: "body"
+          description: "User email"
+          schema: 
+            type: "string"
+            properties:
+              email:
+                type: "string"
+                example: "email@gmail.com"
+      responses:
+        200:
+          description: "이메일 전송 성공"
+        500:
+          description: "이메일 전송 실패"
   /user/email:
     post:
       produces: 
