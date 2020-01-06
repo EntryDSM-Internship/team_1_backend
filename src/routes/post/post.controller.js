@@ -60,7 +60,12 @@ const removeOne = (req, res, next) => {
         return User.findOneByNick(req.decoded.nick)
     }
 
-    const respond = (post) => {
+    const removePostId = (user) => {
+        user.postId.splice(user.postId.indexOf(req.params._id), 1);
+        user.save();
+    }
+
+    const respond = () => {
         res.status(200).json({
             message: 'success',
         });
@@ -72,6 +77,7 @@ const removeOne = (req, res, next) => {
 
     Post.findOneById(req.params._id)
     .then(remove)
+    .then(removePostId)
     .then(respond)
     .catch(onError)
 }
