@@ -1,24 +1,51 @@
 const Post = require('../../models/post');
+const User = require('../../models/user');
 
 //-------------------------------------------------------
 // 글쓰기
 
 const createOne = (req, res, next) => {
-    const { title, content } = req.body;
+    const content = req.body.content;
+    console.log(content);
     const nick = req.decoded.nick;
+    let profile;
+    let id;
+
+    const save = (post) => {
+        if (req.files) {
+            for (let i = 0; i < req.files.length; i++) {
+                post.img.push('post/' + req.files[i].filename);
+            }
+            post.save();
+        }
+        id = post._id;
+        return User.findOneByNick(nick)
+    }
+
+    const post = (user) => {
+        profile = user.img;
+        user.postId.push(id);
+        user.save();
+        return Post.findOneById(id)
+    }
 
     const respond = (post) => {
         res.status(200).json({
-            message: 'success',
+            message: "success",
             post,
+            profile
         });
     }
 
-    const onError = (err) => {
-        res.status(500).json(err);
+    const onError = (error) => {
+        res.status(500).json({
+            message: error.message
+        });
     }
 
-    Post.create(nick, title, content)
+    Post.create(nick, content)
+    .then(save)
+    .then(post)
     .then(respond)
     .catch(onError)
 }
@@ -27,24 +54,24 @@ const createOne = (req, res, next) => {
 // 글 삭제
 
 const removeOne = (req, res, next) => {
-    const del = (post) => {
-        if (req.decoded.nick === post.nick) post.remove();
-        else throw new Error('권한이 없습니다');
+    const remove = (post) => {
+        post.remove();
+        post.save();
+        return User.findOneByNick(req.decoded.nick)
     }
-    
+
     const respond = (post) => {
         res.status(200).json({
             message: 'success',
-            post,
         });
     }
 
     const onError = (err) => {
-        res.status(409).json(err.message);
+        res.status(403).json(err.message);
     }
 
     Post.findOneById(req.params._id)
-    .then(del)
+    .then(remove)
     .then(respond)
     .catch(onError)
 }
@@ -57,7 +84,7 @@ const likeOne = (req, res, next) => {
     const like = (post) => {
         const check = post.like.indexOf(nick);
         if (check == -1) {
-            post.likeCount++;
+            post.likeCount = post.likeCount + 1;
             post.like.push(nick);
             post.save();
         } else {
@@ -65,9 +92,6 @@ const likeOne = (req, res, next) => {
             post.likeCount--;
             post.save();
         }
-    }
-
-    const respond = (post) => {
         res.status(200).json({
             message: 'success',
             like: post.likeCount,
@@ -75,15 +99,14 @@ const likeOne = (req, res, next) => {
     }
 
     const onError = (error) => {
+        console.log(error.message);
         res.status(500).json({ message: error });
     }
 
     Post.findOneById(req.params._id)
     .then(like)
-    .then(respond)
     .catch(onError)
 }
-
 
 module.exports = {
     createOne,
