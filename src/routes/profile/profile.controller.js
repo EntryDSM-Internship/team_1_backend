@@ -194,12 +194,17 @@ const timeline = (req, res, next) => {
 }
 
 const updateProfile = (req, res, next) => {
-    const { email, nick, img } = req.body;
+    const email = req.body.email;
+    const nick = req.body.nick;
+    const img = req.body.img;
+    let changeNick;
+
+    console.log(email, nick, img);
 
     const change = (user) => {
         if (email) {
             User.findOneByEmail(email).then((change) => {
-                if (change) {
+                if (!change) {
                     user.email = email;
                     user.save();
                 } else {
@@ -209,7 +214,8 @@ const updateProfile = (req, res, next) => {
         }
         if (nick) {
             User.findOneByEmail(nick).then((change) => {
-                if (change) {
+                if (!change) {
+                    changeNick = user.nick;
                     user.nick = nick;
                     user.save();
                 } else {
@@ -221,6 +227,27 @@ const updateProfile = (req, res, next) => {
             user.img = img;
             user.save();
         }
+        return User.findAll();
+    }
+
+    const changeFollowing = (user) => {
+        for (let i = 0; i < user.following.lenth; i++) {
+            if (user[i].following.indexOf(changeNick) !== -1) {
+                user[i].following.splice(user[i].following.indexOf(changeNick), 1, nick);
+            }
+        }
+
+        return User.findAll()
+    }
+
+    const changeFollower = (user) => {
+        for (let i = 0; i < user.follower.lenth; i++) {
+            if (user[i].follower.indexOf(changeNick) !== -1) {
+                user[i].follower.splice(user[i].follower.indexOf(changeNick), 1, nick);
+            }
+        }
+
+        return User.findAll()
     }
 
     const respond = () => {
@@ -231,12 +258,14 @@ const updateProfile = (req, res, next) => {
 
     const onError = (err) => {
         res.status(500).json({
-            message: error.message
+            message: err.message
         });
     }
 
     User.findOneByEmail(req.decoded.email)
     .then(change)
+    .then(changeFollowing)
+    .then(changeFollower)
     .then(respond)
     .catch(onError)
 }
