@@ -8,6 +8,7 @@ const createOne = (req, res, next) => {
     const content = req.body.content;
     console.log(content);
     const nick = req.decoded.nick;
+    const userimg = req.decoded.img;
     let profile;
     let id;
 
@@ -43,7 +44,7 @@ const createOne = (req, res, next) => {
         });
     }
 
-    Post.create(nick, content)
+    Post.create(nick, userimg, content)
     .then(save)
     .then(post)
     .then(respond)

@@ -242,7 +242,7 @@ const refreshAccess = (req, res, next) => {
                     img: user.img
                 }, secret,
                 {
-                    expiresIn: '5m'
+                    expiresIn: '30m'
                 }, (err, token) => {
                 if (err) reject(err)
                     resolve(token)
