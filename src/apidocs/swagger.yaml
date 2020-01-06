@@ -14,6 +14,10 @@ tags:
     description: "Follow API"
   - name: "main"
     description: "main API"
+  - name: "comment"
+    description: "comment API"
+  - name: "profile"
+    description: "profile API"
 schemes:
 - "http"
 paths:
@@ -412,6 +416,8 @@ paths:
       responses:
         200:
           description: "성공"
+        400:
+          description: "이미 팔로우 됨 or 자기 자신 팔로우"
         403:
           description: "로그인 되어있지 않음"
         500:
@@ -557,37 +563,6 @@ paths:
           description: "로그인 되어있지 않음"
         500:
           description: "실패"
-  /main:
-    get:
-      produces: 
-      - "application/json"
-      tags: 
-      - "main"
-      summary: "메인 유저정보"
-      description: "메인 유저정보"
-      parameters:
-        - name: "x-access-token"
-          in: "header"
-          type: "string"
-          description: "액세스 토큰"
-      responses:
-        200:
-          description: "성공"
-          schema:
-            type: "object"
-            properties:
-              nick:
-                type: "string"
-              name: 
-                type: "string"
-              email:
-                type: "string"
-              profile:
-                type: "string"
-        403:
-          description: "로그인 되어있지 않음"
-        500:
-          description: "실패"       
   /main/post:
     get:
       produces: 
@@ -639,6 +614,23 @@ paths:
                     isLike:
                       type: "boolean"
                       example: true
+                    profile:
+                      type: "string"
+                      example: "profile/0.jpg"
+                    comment:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          comment:
+                            type: "string"
+                            example: "comment"
+                          commenter:
+                            type: "string"
+                            example: "nick"
+                          commenterImg:
+                            type: "string"
+                            example: "profile/0.jpg"
         403:
           description: "로그인 되어있지 않음"
         500:
@@ -649,18 +641,18 @@ paths:
       - "application/json"
       tags:
       - "profile"
-      summary: "메인 유저정보"
-      description: "메인 유저정보"
+      summary: "타인 유저정보"
+      description: "타인 유저정보"
       parameters:
-        - name: "x-access-token"
-          in: "header"
-          type: "string"
-          description: "액세스 토큰"
-        - name: "nick"
-          in: "path"
-          type: "string"
-          description: "닉네임"
-          required: true
+      - name: "x-access-token"
+        in: "header"
+        type: "string"
+        description: "액세스 토큰"
+      - name: "nick"
+        in: "path"
+        type: "string"
+        description: "닉네임"
+        required: true
       responses:
         200:
           description: "성공"
@@ -669,13 +661,268 @@ paths:
             properties:
               nick:
                 type: "string"
+                example: "nick"
               name: 
                 type: "string"
+                example: "name"
               email:
                 type: "string"
+                example: "email@gmail.com"
               profile:
                 type: "string"
+                example: "profile/0.jpg"
+              following:
+                type: "number"
+                example: "1"
+              follower:
+                type: "number"
+                example: "1"
+              isFollowed: 
+                type: "boolean"
+                example: "true"
+              isMe:
+                type: "boolean"
+                example: "false"
         403:
           description: "로그인 되어있지 않음"
         500:
           description: "실패"
+  /profile:
+    get:
+      produces:
+      - "application/json"
+      tags:
+      - "profile"
+      summary: "마이페이지"
+      description: "마이페이지"
+      parameters:
+      - name: "x-access-token"
+        in: "header"
+        type: "string"
+        description: "액세스 토큰"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              nick:
+                type: "string"
+                example: "nick"
+              name: 
+                type: "string"
+                example: "name"
+              email:
+                type: "string"
+                example: "email@gmail.com"
+              profile:
+                type: "string"
+                example: "profile/0.jpg"
+              following:
+                type: "number"
+                example: "1"
+              follower:
+                type: "number"
+                example: "1"
+              isMe:
+                type: "boolean"
+                example: "true"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /comment/{_id}:
+    post:
+      produces:
+      - "application/json"
+      tags:
+      - "comment"
+      summary: "댓글 작성"
+      description: "댓글 작성"
+      parameters:
+        - name: "x-access-token"
+          in: "header"
+          type: "string"
+          description: "액세스 토큰"
+        - name: "_id"
+          in: "path"
+          type: "string"
+          description: "postId"
+          required: true
+        - name: "comment"
+          in: "body"
+          schema:
+            type: "object"
+            properties:
+              comment:
+                type: "string"
+                example: "comment"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+                example: "success"
+              comment:
+                type: "string"
+                example: "comment"
+              commenter:
+                type: "string"
+                example: "nick"
+              commenterImg:
+                type: "string"
+                example: "profile/0.jpg"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /profile/timeline/{nick}/{n}:
+    get:
+      produces:
+      - "application/json"
+      tags:
+      - "profile"
+      summary: "마이페이지 타임라인"
+      description: "마이페이지 타임라인"
+      parameters:
+      - name: "x-access-token"
+        in: "header"
+        type: "string"
+        description: "액세스 토큰"
+      - name: "nick"
+        in: "path"
+        type: "string"
+        description: "닉네임"
+        required: true
+      - name: "n"
+        in: "path"
+        type: "number"
+        description: "숫자"
+        required: true
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              post: 
+                type: "array"
+                items:
+                  type: "object"
+                  properties:
+                    nick:
+                      type: "string"
+                      example: "nick"
+                    content:
+                      type: "string"
+                      example: "content"
+                    img:
+                      type: "array"
+                      items:
+                          type: "string"
+                    likeCount:
+                      type: "number"
+                      example: "1"
+                    like:
+                      type: "array"
+                      items: 
+                          type: "string"
+                          example: "nick"
+                    date:
+                      type: "string"
+                      example: "date"
+                    isMine:
+                      type: "boolean"
+                      example: true
+                    isLike:
+                      type: "boolean"
+                      example: true
+                    profile:
+                      type: "string"
+                      example: "profile/0.jpg"
+                    comment:
+                      type: "array"
+                      items:
+                        type: "object"
+                        properties:
+                          comment:
+                            type: "string"
+                            example: "comment"
+                          commenter:
+                            type: "string"
+                            example: "nick"
+                          commenterImg:
+                            type: "string"
+                            example: "profile/0.jpg"
+                      
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "실패"
+  /user/password:
+    patch:
+      produces:
+      - "application/json"
+      tags:
+      - "user"
+      summary: "패스워드 변경"
+      description: "패스워드 변경"
+      parameters:
+      - name: "change"
+        in: "body"
+        schema:
+          type: "object"
+          properties:
+            email:
+              type: "string"
+              example: "email@gmail.com"
+            password:
+              type: "string"
+              example: "password"
+      responses:
+        200:
+          description: "성공"
+          schema:
+            type: "object"
+            properties:
+              message: 
+                type: "string"
+                example: "success"
+        500:
+          description: "실패"
+  /profile/update:
+    patch:
+      produces: 
+        - "application/json"
+      consumes: 
+        - "multipart/form-data"
+      tags:
+      - "profile"
+      summary: "프로필 변경"
+      description: "프로필 변경"
+      parameters:
+      - name: "nick"
+        in: "formData"
+        type: "string"
+        description: "닉네임"
+        required: false
+      - name: "img"
+        in: "formData"
+        type: "file"
+        description: "프로필 사진"
+        required: false
+      - name: "email"
+        in: "formData"
+        type: "string"
+        description: "이메일"
+        required: false
+      responses:
+        200:
+          description: "프로필 변경 성공"
+        403:
+          description: "로그인 되어있지 않음"
+        500:
+          description: "회원가입 실패"

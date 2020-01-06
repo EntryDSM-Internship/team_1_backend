@@ -16,7 +16,10 @@ const Post = new Schema({
     date: {
         type: Date,
         default: Date.now,
-    }
+    },
+    comment: Array,
+    commenter: Array,
+    commenterImg: Array,
 });
 
 Post.statics.create = function (nick, content) {

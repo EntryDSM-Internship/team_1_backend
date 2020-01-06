@@ -151,7 +151,6 @@ const profile = (req, res, next) => {
     }
 
     const onError = (error) => {
-        console.log(error.message);
         res.status(500).json({
             message: error.message
         });
@@ -269,6 +268,66 @@ const refreshAccess = (req, res, next) => {
     .catch(onError)
 }
 
+//-------------------------------------------------------
+// 유저 검색
+
+const search = (req, res, next) => {
+    let isFollowed;
+
+    const isFollow = (user) => {
+        if (user.following.indexOf(req.params.nick) === -1) isFollowed = false
+        else isFollowed = true
+
+        return User.findOneByNick(req.params.nick);
+    }
+
+    const respond = (user) => {
+        res.status(200).json({
+            message: "success",
+            profile: user.img,
+            nick: user.nick,
+            isFollowed: isFollowed
+        });
+    }
+
+    const onError = (error) => {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+
+    User.findOneByNick(req.decoded.nick)
+    .then(isFollow)
+    .then(respond)
+    .catch(onError)
+}
+
+//-------------------------------------------------------
+// 비밀번호 변경
+
+const changePassword = (req, res, next) => {
+    const { email, password } = req.body;
+
+    const change = (user) => {
+        user.password = password;
+        user.save();
+        res.status(200).json({
+            message: "success",
+            user
+        });
+    }
+
+    const onError = (error) => {
+        res.status(500).json({
+            message: error.message,
+        });
+    }
+
+    User.findOneByEmail(email)
+    .then(change)
+    .catch(onError)
+}
+
 module.exports = {
     existEmail,
     existNick,
@@ -277,5 +336,7 @@ module.exports = {
     emailAuth,
     profile,
     login,
-    refreshAccess
+    refreshAccess,
+    search,
+    changePassword
 }

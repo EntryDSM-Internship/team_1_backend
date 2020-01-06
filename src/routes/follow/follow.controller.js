@@ -176,16 +176,11 @@ const unFollow = (req, res, next) => {
 }
 
 const unFollower = (req, res, next) => {
-    const email = req.decoded.email;
     const nick = req.params.nick;
-    
-    const userFind = () => {
-        return User.findOneByEmail(email);
-    }
 
     const removed = (user) => {
-        user.follower.splice(user.follower.indexOf(user.nick), 1);
-        user.followerImg.splice(user.follower.indexOf(user.nick), 1);
+        user.follower.splice(user.follower.indexOf(req.decoded.nick), 1);
+        user.followerImg.splice(user.follower.indexOf(req.decoded.nick), 1);
         user.save();
         res.status(200).json({ message: "success to unfollow" });        
     }
