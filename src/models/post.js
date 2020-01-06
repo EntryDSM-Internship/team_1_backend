@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const Post = new Schema({
     nick: String,
+    userImg: String,
     content: {
         type: String,
         default: null
@@ -22,9 +23,10 @@ const Post = new Schema({
     commenterImg: Array,
 });
 
-Post.statics.create = function (nick, content) {
+Post.statics.create = function (nick, userImg, content) {
     const post = new this({
         nick,
+        userImg,
         content,
     });
 

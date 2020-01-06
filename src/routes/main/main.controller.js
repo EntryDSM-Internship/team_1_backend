@@ -16,10 +16,11 @@ const showPost = (req, res, next) => {
                     like: post[i].like,
                     date: post[i].date,
                     nick: post[i].nick,
-                })
+                    profile: post[i].userImg
+                });
             }
+            let commentArr = [];
             for (let i = 0; i < post.length; i++) {
-                let commentArr = [];
                 for (let j = 0; j < post[i].comment.length; j++) {
                     commentArr.push({
                         comment: post[i].comment[j],
@@ -30,12 +31,10 @@ const showPost = (req, res, next) => {
                 if (post[i].like.indexOf(user.nick) === -1) {
                     postArr[i].isMine = true;
                     postArr[i].isLike = false;
-                    postArr[i].profile = user.img;
                     postArr[i].comment = commentArr;
                 } else {
                     postArr[i].isMine = true;
                     postArr[i].isLike = true;
-                    postArr[i].profile = user.img;
                     postArr[i].comment = commentArr;
                 }
             }
@@ -46,6 +45,7 @@ const showPost = (req, res, next) => {
     const inFollowingArr = (user) => {
         for (let i = 0; i < user.following.length; i++) {
             Post.findAll(user.following[i]).then((post) => {
+                let commentArr = [];
                 for (let j = 0; j < post.length; j++) {
                     postArr.push({
                         _id: post[j]._id,
@@ -54,7 +54,8 @@ const showPost = (req, res, next) => {
                         likeCount: post[j].likeCount,
                         like: post[j].like,
                         date: post[j].date,
-                        nick: post[j].nick
+                        nick: post[j].nick,
+                        profile: post[j].userImg
                     })
                 }
                 for (let j = 0; j < post.length; j++) {
@@ -68,12 +69,10 @@ const showPost = (req, res, next) => {
                     if (post[j].like.indexOf(user.nick) === -1) {
                         postArr[i].isMine = false;
                         postArr[i].isLike = false;
-                        postArr[i].profile = user.img;
                         postArr[i].comment = commentArr;
                     } else {
                         postArr[i].isMine = false;
                         postArr[i].isLike = true;
-                        postArr[i].profile = user.img;
                         postArr[i].comment = commentArr;
                     }
                 }
